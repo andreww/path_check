@@ -3,6 +3,25 @@
 import pathlib
 import hashlib
 
+def check_file_pair(file, root, dest_base, source_base, verbose):
+
+    source_file = root/file
+    dest_file = dest_base/source_file.relative_to(source_base)
+    if dest_file.is_file():
+        with open(source_file, "rb") as f:
+            source_digest = hashlib.file_digest(f, "sha256")
+        with open(dest_file, "rb") as f:
+            dest_digest = hashlib.file_digest(f, "sha256")
+        if dest_digest.hexdigest() == source_digest.hexdigest():
+            if verbose:
+                print(f"OK: {dest_file}")
+        else:
+            print(f"DIFFERENT: {dest_file}")
+            print(f"---> {source_file}: {source_digest.hexdigest()}")
+            print(f"---> {dest_file}: {dest_digest.hexdigest()}")
+    else:
+        print(f"MISSING: {dest_file}")
+
 def walk_source(source, dest, verbose=True):
     """
     Recursively look at all files in source and
@@ -18,22 +37,12 @@ def walk_source(source, dest, verbose=True):
         if verbose:
             print(f"IN: {root}")
         for file in files:
-            source_file = root/file
-            dest_file = dest_base/source_file.relative_to(source_base)
-            if dest_file.is_file():
-                with open(source_file, "rb") as f:
-                    source_digest = hashlib.file_digest(f, "sha256")
-                with open(dest_file, "rb") as f:
-                    dest_digest = hashlib.file_digest(f, "sha256")
-                if dest_digest.hexdigest() == source_digest.hexdigest():
-                    if verbose:
-                        print(f"OK: {dest_file}")
-                else:
-                    print(f"DIFFERENT: {dest_file}")
-                    print(f"---> {source_file}: {source_digest.hexdigest()}")
-                    print(f"---> {dest_file}: {dest_digest.hexdigest()}")
-            else:
-                print(f"MISSING: {dest_file}")         
+            try:
+                check_file_pair(file, root, dest_base, source_base, verbose)
+            except Exception as ex:
+                print(f"ERROR: {root/file}")
+                print(f"---> exception type: {type(ex)}")
+                print(ex)
 
 if __name__ == "__main__":
     import argparse
