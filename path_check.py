@@ -16,24 +16,22 @@ def walk_source(source, dest, verbose=True):
 
     for root, dirs, files in source_base.walk():
         if verbose:
-            print(f"In {root}")
+            print(f"IN: {root}")
         for file in files:
             source_file = root/file
             dest_file = dest_base/source_file.relative_to(source_base)
-            if verbose:
-                print(f"Comparing {source_file} with {dest_file}")
             if dest_file.is_file():
                 with open(source_file, "rb") as f:
                     source_digest = hashlib.file_digest(f, "sha256")
                 with open(dest_file, "rb") as f:
                     dest_digest = hashlib.file_digest(f, "sha256")
                 if dest_digest.hexdigest() == source_digest.hexdigest():
-                    print(f"OK: {dest_file}")
+                    if verbose:
+                        print(f"OK: {dest_file}")
                 else:
                     print(f"DIFFERENT: {dest_file}")
-                    if verbose:
-                        print(f"{source_file}: {source_digest.hexdigest()}")
-                        print(f"{dest_file}: {dest_digest.hexdigest()}")
+                    print(f"---> {source_file}: {source_digest.hexdigest()}")
+                    print(f"---> {dest_file}: {dest_digest.hexdigest()}")
             else:
                 print(f"MISSING: {dest_file}")         
 
