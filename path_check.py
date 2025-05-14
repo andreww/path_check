@@ -62,9 +62,9 @@ def recheck(output_file, source, dest, verbose=True):
     with open(output_file, "r") as f:
         for line in f:
             if line[0:3] == 'IN:':
-                current_root = line.split(':')[1]
+                current_root = pathlib.Path(line.split(':')[1])
             elif line[0:6] == 'ERROR:':
-                check_file = line.split(':')[1]
+                check_file = pathlib.Path(line.split(':')[1])
                 try:
                     check_file_pair(check_file, current_root, dest_base, source_base, verbose)
                 except Exception as ex:
